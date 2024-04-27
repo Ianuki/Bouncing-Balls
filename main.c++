@@ -3,23 +3,29 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <time.h>
+#include <cmath>
 
 #include "ball.h"
 
-int main(int Argc, char * Argv[]) { 
-    const int screen_width = 1200;
-    const int screen_height = 800;
+int main(int argc, char * argv[]) { 
+    const unsigned int screen_width = 1200;
+    const unsigned int screen_height = 800;
+    const unsigned int max_frame_rate = 60;
 
     SetConsoleTitleA("- Debugging -");
+
     sf::RenderWindow window(sf::VideoMode(screen_width, screen_height), "Balls", sf::Style::Default);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(max_frame_rate);
+    window.setVerticalSyncEnabled(true);
 
     std::vector<ball*> balls;
     bool paused = false;
 
-    while (window.isOpen()) {
-        window.clear();
+    int fps = 0;
 
+    while (window.isOpen()) {
+        clock_t start = clock();
         sf::Event win_event;
 
         while (window.pollEvent(win_event)) {
@@ -55,11 +61,21 @@ int main(int Argc, char * Argv[]) {
             b->draw(window);
         }
 
-        char title_buffer[100]; 
-        snprintf(title_buffer, sizeof(title_buffer), "Balls count: %d | FPS: %f", balls.size(), 60.f);
+        window.display();
+        window.clear();
+
+        if (!paused) {
+            fps = 1.f / (clock() - start) * 1000.f;
+            
+            if (fps > max_frame_rate) {
+                fps = max_frame_rate;
+            }
+        }
+
+        char title_buffer[100];
+        snprintf(title_buffer, sizeof(title_buffer), "Balls count: %d | FPS: %d", balls.size(), fps);
 
         window.setTitle(std::string(title_buffer));
-        window.display();
     }
 
 	return 0;
